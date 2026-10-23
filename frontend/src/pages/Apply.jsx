@@ -354,8 +354,13 @@ export default function Apply() {
           </div>
         )}
         <Button className="mt-5 w-full" onClick={submit} loading={submitting} disabled={!application}>
-          Submit application
+          {submitting ? 'AI agents are checking your application…' : 'Submit application'}
         </Button>
+        {submitting && (
+          <p className="mt-2 text-center text-xs text-slate-500">
+            Document, credit and compliance checks usually take 10–15 seconds.
+          </p>
+        )}
       </Card>
     </div>
   )

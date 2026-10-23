@@ -119,8 +119,8 @@ class Application(Base):
     created_at: Mapped[datetime] = created_at_col()
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
 
-    user: Mapped["User"] = relationship()
-    product: Mapped["LoanProduct"] = relationship()
+    user: Mapped["User"] = relationship(lazy="joined")  # loaded with the application: one round trip, not two
+    product: Mapped["LoanProduct"] = relationship(lazy="joined")
     documents: Mapped[list["Document"]] = relationship(back_populates="application")
 
     @property

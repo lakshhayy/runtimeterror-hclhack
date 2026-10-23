@@ -223,7 +223,7 @@ export default function ApplicationDetail() {
               </div>
               {app.status === 'DRAFT' ? (
                 <Button className="mt-4 w-full" loading={acting} onClick={() => act('submit', 'Application submitted')}>
-                  Submit application
+                  {acting ? 'AI agents are checking your application…' : 'Submit application'}
                 </Button>
               ) : (
                 <>
@@ -233,7 +233,11 @@ export default function ApplicationDetail() {
                     disabled={detail.missingDocTypes.length > 0}
                     onClick={() => act('recheck', 'Documents submitted for checks')}
                   >
-                    {latestRunStatus === 'FAILED' ? 'Re-run checks' : 'Submit documents'}
+                    {acting
+                      ? 'AI agents are re-checking…'
+                      : latestRunStatus === 'FAILED'
+                        ? 'Re-run checks'
+                        : 'Submit documents'}
                   </Button>
                   {detail.missingDocTypes.length > 0 && (
                     <p className="mt-2 text-center text-xs text-slate-500">Upload the missing documents first.</p>

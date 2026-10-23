@@ -61,10 +61,12 @@ def get_kyc_status(db, user_id: int) -> dict:
 def policy_lookup(db, loan_type: str):
     """Top eligibility policy source for this loan type, or None if unavailable."""
     try:
+        from app.database import SessionLocal
         from app.services.rag import retrieve
 
-        with db.begin_nested():  # a failed query must not break the pipeline's transaction
-            rows = retrieve(db, "eligibility criteria minimum credit score", "OFFICER", loan_type, k=1)
+        # Separate short session: a failed lookup can't break the pipeline's transaction.
+        with SessionLocal() as lookup_db:
+            rows = retrieve(lookup_db, "eligibility criteria minimum credit score", "OFFICER", loan_type, k=1)
         if not rows:
             return None
         top = rows[0]
