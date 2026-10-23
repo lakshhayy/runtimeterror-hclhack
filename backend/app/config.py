@@ -29,6 +29,12 @@ class Settings(BaseSettings):
     POLICY_DIR: str = "policies"
     UPLOAD_DIR: str = "uploads"
 
+    # Document storage: "local" (UPLOAD_DIR) or "supabase" (private bucket; needed when deployed)
+    STORAGE_BACKEND: str = "local"
+    SUPABASE_URL: str = ""
+    SUPABASE_SERVICE_KEY: str = ""
+    STORAGE_BUCKET: str = "loan-documents"
+
     @property
     def cors_origins_list(self) -> list[str]:
         """CORS_ORIGINS is comma-separated in .env."""

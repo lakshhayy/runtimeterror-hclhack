@@ -6,7 +6,6 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy import select
 
-from app.config import settings
 from app.core.access import get_application_or_404
 from app.core.audit import log_audit
 from app.core.errors import AppError
@@ -17,18 +16,13 @@ from app.models import DOC_TYPES, Application, Document, LoanProduct, StatusHist
 from app.schemas.applications import ApplicationIn, ApplicationOut, DocumentOut
 from app.schemas.pipeline import SubmitOut
 from app.services.emi import format_inr
+from app.services.storage import delete_file, save_file
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 
-BACKEND_DIR = Path(__file__).resolve().parents[2]
-ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png"}
+ALLOWED_EXTENSIONS = {".pdf": "application/pdf", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png"}
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 UPLOAD_STATUSES = ("DRAFT", "UNDER_VERIFICATION")
-
-
-def upload_root() -> Path:
-    path = Path(settings.UPLOAD_DIR)
-    return path if path.is_absolute() else BACKEND_DIR / path
 
 
 def get_own_application(db, app_id: int, user) -> Application:
@@ -98,17 +92,14 @@ def upload_document(app_id: int, doc_type: str = Form(alias="docType"), file: Up
         raise AppError(400, "EMPTY_FILE", "The file is empty")
 
     safe_name = re.sub(r"[^A-Za-z0-9._-]", "_", original)[-100:]
-    folder = upload_root() / str(app.id)
-    folder.mkdir(parents=True, exist_ok=True)
-    path = folder / f"{uuid.uuid4().hex}_{safe_name}"
-    path.write_bytes(content)
+    file_ref = save_file(f"{app.id}/{uuid.uuid4().hex}_{safe_name}", content, ALLOWED_EXTENSIONS[ext])
 
     old = db.scalar(select(Document).where(Document.application_id == app.id, Document.doc_type == doc_type))
     if old is not None:
-        Path(old.file_path).unlink(missing_ok=True)
+        delete_file(old.file_path)
         db.delete(old)
     doc = Document(user_id=user.id, application_id=app.id, doc_type=doc_type, file_name=safe_name,
-                   file_path=str(path))
+                   file_path=file_ref)
     db.add(doc)
     log_audit(db, action="DOC_UPLOAD", user_id=user.id, entity=f"application:{app.id}",
               input={"docType": doc_type, "fileName": safe_name, "bytes": len(content), "replaced": old is not None})
