@@ -6,21 +6,24 @@
   --color-teal-dark: #0E8A82;
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
-}
+/* Base styles live in the base layer so utility classes (e.g. text-white) can override them. */
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
 
-body {
-  background: #ffffff;
-  color: #1e293b;
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
+  body {
+    background: #ffffff;
+    color: #1e293b;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
 
-h1,
-h2,
-h3 {
-  color: var(--color-navy);
+  h1,
+  h2,
+  h3 {
+    color: var(--color-navy);
+  }
 }
