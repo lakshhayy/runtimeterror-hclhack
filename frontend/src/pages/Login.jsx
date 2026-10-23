@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Briefcase, Landmark, ShieldCheck, User } from 'lucide-react'
 import { getErrorMessage } from '../api/client'
@@ -90,6 +90,12 @@ export default function Login() {
               Log in
             </Button>
           </form>
+          <p className="mt-4 text-center text-sm text-slate-500">
+            New to Kestrel Bank?{' '}
+            <Link to="/signup" className="font-medium text-teal hover:underline">
+              Create an account
+            </Link>
+          </p>
 
           <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
             <div className="h-px flex-1 bg-slate-200" />

@@ -16,6 +16,7 @@ import MyApplications from './pages/MyApplications'
 import OfficerApplications from './pages/OfficerApplications'
 import PolicyAssistant from './pages/PolicyAssistant'
 import Products from './pages/Products'
+import Signup from './pages/Signup'
 
 /** "/" sends each role to its own home page. */
 function RoleRedirect() {
@@ -34,6 +35,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       <Route path="/" element={<RoleRedirect />} />
 
       <Route element={<ProtectedRoute />}>

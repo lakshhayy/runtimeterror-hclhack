@@ -54,7 +54,7 @@ def _readable_validation_message(exc: RequestValidationError) -> str:
     parts = []
     for err in exc.errors():
         loc = [str(p) for p in err.get("loc", ()) if p not in ("body", "query", "path")]
-        msg = err.get("msg", "invalid value")
+        msg = err.get("msg", "invalid value").removeprefix("Value error, ")
         msg = msg[0].lower() + msg[1:] if msg else msg
         parts.append(f"{'.'.join(loc)}: {msg}" if loc else msg)
     return "; ".join(parts) or "Invalid request"
