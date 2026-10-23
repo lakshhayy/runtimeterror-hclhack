@@ -1,0 +1,52 @@
+# Render Blueprint for the LoanLens AI backend.
+# Render dashboard -> New -> Blueprint -> pick this repo. Secrets marked sync: false are entered in the dashboard.
+services:
+  - type: web
+    name: loanlens-api
+    runtime: python
+    rootDir: backend
+    region: singapore          # closest Render region to the Supabase project (ap-southeast-2)
+    plan: free                 # measured ~300-380 MB with the embedding model, under the 512 MB limit
+                               # free services sleep after 15 min idle: open /api/v1/health before a demo
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: OMP_NUM_THREADS     # keep the embedding model light on the small free CPU
+        value: "1"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE_MINUTES
+        value: "30"
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: openai/gpt-oss-120b
+      - key: EMBED_PROVIDER
+        value: local
+      - key: EMBED_MODEL
+        value: BAAI/bge-small-en-v1.5
+      - key: EMBED_DIM
+        value: "384"
+      - key: RAG_MIN_SCORE
+        value: "0.55"
+      - key: RAG_HIGH_SCORE
+        value: "0.72"
+      - key: CORS_ORIGINS
+        sync: false            # the deployed frontend URL, e.g. https://loanlens.netlify.app
+      - key: POLICY_DIR
+        value: policies
+      - key: STORAGE_BACKEND
+        value: supabase
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: STORAGE_BUCKET
+        value: loan-documents

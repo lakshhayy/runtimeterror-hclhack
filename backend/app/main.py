@@ -18,6 +18,12 @@ async def lifespan(app: FastAPI):
         init_db()
     except Exception as exc:
         print(f"Database init failed: {exc}")
+    try:
+        from app.core.llm import embed
+
+        embed("warm up")  # load the embedding model now, not on the first user question
+    except Exception as exc:
+        print(f"Embedding warm-up skipped: {exc}")
     yield
 
 
