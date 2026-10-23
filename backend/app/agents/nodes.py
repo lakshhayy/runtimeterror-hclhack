@@ -35,11 +35,11 @@ class LoanState(TypedDict, total=False):
 class ToolRecorder:
     """Calls tools for one agent and remembers each call for the step's tool_calls."""
 
-    def __init__(self, db, agent: str):
-        self.db, self.agent, self.calls = db, agent, []
+    def __init__(self, db, agent: str, application_id: int | None = None):
+        self.db, self.agent, self.application_id, self.calls = db, agent, application_id, []
 
     def __call__(self, tool: str, **args):
-        result = call_tool(self.db, self.agent, tool, args)
+        result = call_tool(self.db, self.agent, tool, args, application_id=self.application_id)
         self.calls.append({"tool": tool, "args": args, "result": result})
         return result
 
@@ -86,7 +86,7 @@ def is_priority(amount: float, risk: str, checks: list[dict]) -> bool:
 # ---------- agent nodes ----------
 
 def document_agent(state: LoanState, config: RunnableConfig) -> dict:
-    tools = ToolRecorder(_db(config), "DocumentVerificationAgent")
+    tools = ToolRecorder(_db(config), "DocumentVerificationAgent", state["application_id"])
     app_id = state["application_id"]
     uploaded = set(tools("get_documents", application_id=app_id))
     missing = [DOC_LABELS[t] for t in DOC_TYPES if t not in uploaded]
@@ -109,7 +109,7 @@ def document_agent(state: LoanState, config: RunnableConfig) -> dict:
 
 
 def credit_agent(state: LoanState, config: RunnableConfig) -> dict:
-    tools = ToolRecorder(_db(config), "CreditAssessmentAgent")
+    tools = ToolRecorder(_db(config), "CreditAssessmentAgent", state["application_id"])
     credit = tools("get_credit_score", user_id=state["user_id"])
     foir = tools("calc_foir", application_id=state["application_id"])["foir"]
     ok = credit["score"] >= state["min_credit_score"] and foir <= 50
@@ -121,7 +121,7 @@ def credit_agent(state: LoanState, config: RunnableConfig) -> dict:
 
 
 def compliance_agent(state: LoanState, config: RunnableConfig) -> dict:
-    tools = ToolRecorder(_db(config), "ComplianceAgent")
+    tools = ToolRecorder(_db(config), "ComplianceAgent", state["application_id"])
     kyc = tools("get_kyc_status", user_id=state["user_id"])["status"]
     policy = tools("policy_lookup", loan_type=state["loan_type"])
     if kyc == "VERIFIED":
@@ -135,7 +135,7 @@ def compliance_agent(state: LoanState, config: RunnableConfig) -> dict:
 
 def decide(state: LoanState, config: RunnableConfig) -> dict:
     """Orchestrator: risk band + recommendation, then hand to a human (UNDER_REVIEW). It can never approve."""
-    tools = ToolRecorder(_db(config), "Orchestrator")
+    tools = ToolRecorder(_db(config), "Orchestrator", state["application_id"])
     checks = [s for s in state["steps"] if s["agent"] != "Orchestrator"]
     risk = risk_band(state["credit"]["score"], state["foir"])
     recommendation = decide_recommendation(checks, state.get("missing_documents", []), risk)

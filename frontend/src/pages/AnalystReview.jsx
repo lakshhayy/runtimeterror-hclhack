@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { AlertTriangle, ArrowLeft, CheckCircle2, ShieldCheck, XCircle } from 'lucide-react'
 import client, { getErrorMessage } from '../api/client'
+import AgentWorkflow from '../components/AgentWorkflow'
 import Badge from '../components/Badge'
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -156,6 +157,10 @@ export default function AnalystReview() {
             </Card>
           )}
         </div>
+      </div>
+
+      <div className="mt-6">
+        <AgentWorkflow steps={detail.steps} latestRun={latestRun} />
       </div>
 
       {canDecide && (

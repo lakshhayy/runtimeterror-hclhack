@@ -28,10 +28,11 @@ def is_tool_allowed(agent: str, tool: str) -> bool:
     return tool in AGENT_PERMISSIONS.get(agent, set())
 
 
-def call_tool(db, agent: str, tool: str, args: dict):
-    """Run a tool on behalf of an agent, enforcing the allowlist."""
+def call_tool(db, agent: str, tool: str, args: dict, application_id: int | None = None):
+    """Run a tool on behalf of an agent, enforcing the allowlist. application_id links the audit row."""
     actor = f"agent:{agent}"
-    entity = f"application:{args['application_id']}" if "application_id" in args else None
+    app_id = application_id or args.get("application_id")
+    entity = f"application:{app_id}" if app_id else None
     if not is_tool_allowed(agent, tool) or tool not in TOOLS:
         log_audit(db, action="TOOL_DENIED", status="DENIED", actor=actor, entity=entity,
                   input={"tool": tool, "args": args}, commit=True)

@@ -60,6 +60,19 @@ def review_queue(db=Depends(get_db), user=Depends(require_role("ANALYST"))):
     return items
 
 
+@router.get("/analyst/workflow")
+def workflow_graph(user=Depends(require_role("ANALYST"))):
+    """The agent pipeline's structure, read from the compiled LangGraph (not hard-coded)."""
+    from app.agents.graph import loan_graph
+
+    graph = loan_graph.get_graph()
+    return {
+        "nodes": [node_id for node_id in graph.nodes],
+        "edges": [{"source": e.source, "target": e.target, "conditional": e.conditional} for e in graph.edges],
+        "mermaid": graph.draw_mermaid(),
+    }
+
+
 @router.get("/analyst/applications/{app_id}", response_model=AnalystDetail)
 def review_detail(app_id: int, db=Depends(get_db), user=Depends(require_role("ANALYST"))):
     app = db.get(Application, app_id)
