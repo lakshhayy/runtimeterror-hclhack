@@ -13,17 +13,19 @@ class Settings(BaseSettings):
     JWT_SECRET: str = "change-me-to-a-long-random-string"
     JWT_EXPIRE_MINUTES: int = 480
 
-    LLM_PROVIDER: str = "openai"  # "openai" or "gemini"
+    LLM_PROVIDER: str = "openai"  # "openai", "gemini" or "groq"
     OPENAI_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
     LLM_MODEL: str = "gpt-4o-mini"
+    EMBED_PROVIDER: str = ""  # "openai", "gemini" or "local"; empty = same as LLM_PROVIDER (groq -> local)
     EMBED_MODEL: str = "text-embedding-3-small"
     EMBED_DIM: int = 768
 
     RAG_MIN_SCORE: float = 0.35
     RAG_HIGH_SCORE: float = 0.55
 
-    CORS_ORIGINS: str = "http://localhost:5173"
+    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
     POLICY_DIR: str = "policies"
     UPLOAD_DIR: str = "uploads"
 
