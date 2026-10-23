@@ -1,0 +1,4 @@
+"""Applications routes."""
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/applications", tags=["applications"])
